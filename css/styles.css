@@ -15,10 +15,17 @@ img {
 }
 
 #children {
-    text-align: center;
+    height: 188px;
+    margin: 0 auto;
+
+    position: relative;
 }
 #children img {
-    margin: 0 5px;
+    margin: 0 10px 0 0;
+    display: block;
+
+    position: absolute;
+    top: 0;
 }
 
 #children.text {
