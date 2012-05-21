@@ -1,15 +1,29 @@
+img {
+    border: 1px solid #eee;
+}
 #main {
-    height: 375px;
-    margin: 0 0 10px;
+    width: 500px; height: 375px;
+    margin: 0 0 10px -250px;
 
     position: relative;
+    left: 50%;
 }
 #main img {
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
     z-index: 999;
 }
 
 #children {
-    
+    text-align: center;
+}
+#children img {
+    margin: 0 5px;
+}
+
+#children.text {
+    width: 800px;
+    margin: 0 auto;
+
+    text-align: left;
 }
