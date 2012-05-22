@@ -11,8 +11,8 @@ class Home extends CI_Controller {
 
         if ($category == 2) {
             $images = array(
-                array('id' => 5, 'image' => base_url('images/image03.jpg'), 'title' => 'image03'),
-                array('id' => 6, 'image' => base_url('images/image02.jpg'), 'title' => 'image02'),
+                array('id' => 5, 'image' => base_url('images/image03.jpg'), 'title' => 'image 05'),
+                array('id' => 6, 'image' => base_url('images/image02.jpg'), 'title' => 'image 06'),
             );
 
             $return['next'] = true;
