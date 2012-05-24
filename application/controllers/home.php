@@ -1,14 +1,18 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Home extends CI_Controller {
+    
     public function index() {
         $this->load->view('home');
+        var_dump($this->doctrine->em->getRepository('Entities\Category')->getCatAndChildren(1));
     }
 
     public function next() {
-        $return = array();
+        $return = array('next' => true);
         $category = $this->input->get('category');
-
+        if(!$category){
+            return;
+        }
         if ($category == 2) {
             $images = array(
                 array('id' => 5, 'image' => base_url('images/image03.jpg'), 'title' => 'image 05'),
