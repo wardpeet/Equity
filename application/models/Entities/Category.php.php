@@ -1,14 +1,12 @@
 <?php
 
 namespace Entities;
-
 use Doctrine\Mapping;
 
 /**
  * @Entity(repositoryClass="Repositories\CategoryRepository")
  */
 class Category {
-
     /**
      * @Id
      * @Column(type="integer")

@@ -108,6 +108,7 @@ p {
 ----------------------------------------------------------------*/
 #children.slider {
     width: 891px; height: auto;
+    overflow: hidden;
 }
 #children.slider > div {
     width: 9999px;  
