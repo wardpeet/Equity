@@ -4,7 +4,21 @@ class Home extends CI_Controller {
     
     public function index() {
         $this->load->view('home');
-        var_dump($this->doctrine->em->getRepository('Entities\Category')->getCatAndChildren(1));
+        $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren(1);//1 = language id
+        $main = array();
+        $subs = array();
+        var_dump($cats);
+        echo '<hr>';
+        foreach($cats AS $category){
+            if(is_null($category->getParent())){
+                $main = array('id' => $category->getId(), 'image' => base_url('images/'.$category->getId().'.jpg'), 'title' => $category->getName());
+            }else{
+                $subs[] = array('id' => $category->getId(), 'image' => base_url('images/'.$category->getId().'.jpg'), 'title' => $category->getName());
+            }
+        }
+        var_dump($main);
+        echo '<hr>';
+        var_dump($subs);
     }
 
     public function next() {

@@ -6,6 +6,7 @@ use Doctrine\Mapping;
 
 /**
  * @Entity(repositoryClass="Repositories\CategoryRepository")
+ * @Table(name="categories")
  */
 class Category {
 
@@ -27,12 +28,14 @@ class Category {
     protected $tags;
     
     /**
-     * @ManyToOne(targetEntity="Entities\Categories")
+     * @ManyToOne(targetEntity="Entities\Category")
+     * @Column(name="parent")
      */
     protected $parent;
     
     /**
-     * @ManyToOne(targetEntity="Entities\Languages")
+     * @ManyToOne(targetEntity="Entities\Language")
+     * @Column(name="language")
      */
     protected $language;
     
