@@ -12,13 +12,17 @@ use Doctrine\ORM\EntityRepository;
  */
 class CategoryRepository extends EntityRepository {
 
-    public function getCategoryAndSurroundings($id) {
-        $qb = $this->createQueryBuilder('c')
-                ->select('c')
-                ->where('c.id = :id')
-                ->orWhere('c.parent = :id')
-                ->orWhere('c.id = (SELECT parent FROM categories WHERE id = :id)')
-                ->setParameter('id', $id);
+    public function getChildren($id) {
+        $qb = $this->createQuery("SELECT id, name, tags, parent, language FROM categories
+WHERE parent = :id")->setParameter('id', $id);
+
+        return $qb->getQuery()->getResult();
+    }
+    
+    public function getCatAndChildren($id) {
+        $qb = $this->createQuery("SELECT id, name, tags, parent, language FROM categories
+WHERE id = :id
+OR parent = :id")->setParameter('id', $id);
 
         return $qb->getQuery()->getResult();
     }
