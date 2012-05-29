@@ -1,4 +1,6 @@
 body {
+    margin: 10px;
+
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10px;
 }
@@ -8,14 +10,22 @@ img {
 p {
     font-size: 1.2em;
 }
+#overlay {
+    background: #000;
+    width: 100%; height: 100%;
+    opacity: 0.4;
+
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 9998;
+}
 
 #main {
     width: 500px; height: 375px;
-    margin: 0 0 10px -250px;
+    margin: 0 auto 15px;
     overflow: hidden;
 
     position: relative;
-    left: 50%;
 }
 #main img {
     position: absolute;
@@ -50,6 +60,8 @@ p {
     text-align: left;
 }
 
+/* Button
+----------------------------------------------------------------*/
 .button {
     background: #f3f3f3;
     padding: 5px 6px 4px;
@@ -73,6 +85,8 @@ p {
     color: #333;
 }
 
+/* Caption
+----------------------------------------------------------------*/
 .caption {
     background: #000;
     width: 100%;
@@ -88,4 +102,55 @@ p {
 }
 .caption span {
     padding: 0 10px;
+}
+
+/* Slider
+----------------------------------------------------------------*/
+#children.slider {
+    width: 891px; height: auto;
+    overflow: hidden;
+}
+#children.slider > div {
+    width: 9999px;  
+}
+#children.slider img {
+    width: 467px;
+    margin: 0 10px;
+}
+#children.slider div {
+    height: auto;
+    cursor: default;
+
+    position: static;
+}
+#children.slider .small {
+    width: 200px; height: auto;
+    margin: 0;
+    display: inline-block;
+    opacity: 0.4;
+}
+#children.slider img.small {
+    cursor: pointer;
+}
+.choiceBox {
+    background: #efefef;
+    width: 300px;
+    border: 1px solid #333;
+
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+
+    position: absolute;
+    z-index: 9999;
+}
+.choiceBox h1 {
+    background: #2f2e34;
+    padding: 10px; margin: 0;
+
+    color: #fff;
+    text-shadow: 0 0 1px #555;
+}
+.choiceBox .button {
+    display: block;
 }

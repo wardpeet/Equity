@@ -23,6 +23,16 @@ class Category {
     protected $name;
 
     /**
+     * @Column(type="text")
+     */
+    protected $text;
+
+    /**
+     * @Column(type="integer")
+     */
+    protected $type;
+
+    /**
      * @Column(type="string",length=255)
      */
     protected $tags;
@@ -53,6 +63,22 @@ class Category {
 
     public function setName($name) {
         $this->name = $name;
+    }
+    
+    public function getText() {
+        return $this->text;
+    }
+
+    public function setText($text) {
+        $this->text = $text;
+    }
+    
+    public function getType() {
+        return $this->type;
+    }
+    
+    public function setType($type) {
+       $this->type = $type;
     }
 
     public function getTags() {
