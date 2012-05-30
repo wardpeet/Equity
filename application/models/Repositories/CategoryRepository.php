@@ -12,13 +12,14 @@ class CategoryRepository extends EntityRepository {
     }
     
     /**
-     * PAY ATENTION, returns a partial object! (id, text, type)
+     * PAY ATENTION, returns an integer, NOT an object
      * @param int $id, category id
-     * @return Category 
+     * @return int 
      */
-    public function getTextAndType($id) {
-        $qb = $this->_em->createQuery("SELECT partial c.{id,text,type} FROM Entities\Category c WHERE c.id = :id")->setParameter('id', $id);
-        return $qb->getResult();
+    public function getType($id) {
+        $qb = $this->_em->createQuery("SELECT partial c.{id,type} FROM Entities\Category c WHERE c.id = :id")->setParameter('id', $id);
+        $ret = $qb->getResult();
+        return $ret[0]->getType();
     }
     
     /**

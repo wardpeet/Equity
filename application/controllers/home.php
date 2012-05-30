@@ -7,7 +7,9 @@ class Home extends CI_Controller {
     
     
     public function index() {
-        $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren(1);//1 = language id
+        $language = 1;
+        
+        $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren($language);
         $main = array();
         $subs = array();
         foreach($cats AS $category){
@@ -22,44 +24,10 @@ class Home extends CI_Controller {
     }
 
     public function next() {
-        $return = array('next' => true);
         $category = $this->input->get('category');
-        if(!$category && !is_numeric($category)){
+        if(!$category || !is_numeric($category)){
             return;
         }
-/*        if ($category == 2) {
-            $images = array(
-                array('id' => 5, 'image' => base_url('images/image03.jpg'), 'title' => 'image 05'),
-                array('id' => 6, 'image' => base_url('images/image02.jpg'), 'title' => 'image 06'),
-            );
-
-            $return['next'] = true;
-            $return['data'] = $images;
-        } else {
-            
-            // type 1
-            /*$return['next'] = false;
-            $return['data'] = array(
-                'type' => 1,
-                'pictures' => array(array('title' => 'image 01', 'image' => base_url('images/image01.jpg')),
-                    array('title' => 'image 02', 'image' => base_url('images/image02.jpg')),
-                    array('title' => 'image 03', 'image' => base_url('images/image03.jpg')),
-                    array('title' => 'image 04', 'image' => base_url('images/image04.jpg')),
-                    array('title' => 'image 05', 'image' => base_url('images/image01.jpg')),
-                    array('title' => 'image 06', 'image' => base_url('images/image02.jpg')))
-            );
-            // type 2
-            $return['next'] = false;
-            $return['data'] = array(
-                'type' => 1,
-                'pictures' => array(array('title' => 'image 01', 'image' => base_url('images/image01.jpg')),
-                    array('title' => 'image 02', 'image' => base_url('images/image02.jpg')),
-                    array('title' => 'image 03', 'image' => base_url('images/image03.jpg')),
-                    array('title' => 'image 04', 'image' => base_url('images/image04.jpg')),
-                    array('title' => 'image 05', 'image' => base_url('images/image01.jpg')),
-                    array('title' => 'image 06', 'image' => base_url('images/image02.jpg')))
-            );
-        }*/
         
         $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getChildren($category);
         $return = array('next' => false, 'data' => array());
@@ -68,18 +36,37 @@ class Home extends CI_Controller {
             $return['data'][] = array('id' => $category->getId(), 'image' => base_url('images/'.$category->getId().'.jpg'), 'title' => $category->getName());
         }
         if(!$return['next']){
-            $ret = Doctrine::getInstance()->getRepository('Entities\Category')->getTextAndType($category);
-            $ret = $ret[0];
-            switch($ret->getType()){
+            $type = Doctrine::getInstance()->getRepository('Entities\Category')->getType($category);
+            switch($type){
                 case self::TYPE_SLIDER:
-                    $return['data'] = unserialize($ret->getText());
-                    break;
                 case self::TYPE_SCHEME:
-                    $return['data'] = unserialize($ret->getText());
-                    break;
+                    $return['data']['type'] = $type;
+                    $return['data']['resources'] = array();
+                    
+                    $oldid = 0;
+                    $newid = 0;
+                    $tmp = Doctrine::getInstance()->getRepository('Entities\Resource')->getResources($category);
+                    foreach($tmp as $key => $val){
+                        if($val->getParent() == null){
+                            $return['data']['resources'][] = $val->getArray();
+                            $newid = $val->getId();
+                            unset($tmp[$key]);
+                            break;
+                        }
+                    }
+                    while($oldid != $newid && count($tmp) != 0){
+                        foreach($tmp as $key => $val){
+                            if($val->getParent() == $newid){
+                                $return['data']['resources'][] = $val->getArray();
+                                $oldid = $newid;
+                                $newid = $val->getId();
+                                unset($tmp[$key]);
+                                break;
+                            }
+                        }
+                    }
+                break;
             }
-            $return['data'] = unserialize($ret->getText());
-            $return['data']['type'] = $ret->getType();
         }
         echo json_encode($return);
     }

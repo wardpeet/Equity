@@ -23,11 +23,6 @@ class Category {
     protected $name;
 
     /**
-     * @Column(type="text")
-     */
-    protected $text;
-
-    /**
      * @Column(type="integer")
      */
     protected $type;
@@ -63,14 +58,6 @@ class Category {
 
     public function setName($name) {
         $this->name = $name;
-    }
-    
-    public function getText() {
-        return $this->text;
-    }
-
-    public function setText($text) {
-        $this->text = $text;
     }
     
     public function getType() {
@@ -110,11 +97,9 @@ class Category {
      * Set language
      *
      * @param Entities\Language $role
-     * @return Category
      */
     public function setLanguage(Entities\Language $language = null) {
         $this->language = $language;
-        return $this;
     }
 
 }
