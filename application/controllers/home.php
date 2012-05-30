@@ -47,7 +47,7 @@ class Home extends CI_Controller {
                     array('title' => 'image 04', 'image' => base_url('images/image04.jpg')),
                     array('title' => 'image 05', 'image' => base_url('images/image01.jpg')),
                     array('title' => 'image 06', 'image' => base_url('images/image02.jpg')))
-            );*/
+            );
             // type 2
             $return['next'] = false;
             $return['data'] = array(
