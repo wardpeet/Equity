@@ -18,7 +18,9 @@ class Home extends CI_Controller {
             $return['next'] = true;
             $return['data'] = $images;
         } else {
-            $return['next'] = false;
+            
+            // type 1
+            /*$return['next'] = false;
             $return['data'] = array(
                 'type' => 1,
                 'pictures' => array(array('title' => 'image 01', 'image' => base_url('images/image01.jpg')),
@@ -27,6 +29,14 @@ class Home extends CI_Controller {
                     array('title' => 'image 04', 'image' => base_url('images/image04.jpg')),
                     array('title' => 'image 05', 'image' => base_url('images/image01.jpg')),
                     array('title' => 'image 06', 'image' => base_url('images/image02.jpg')))
+            );*/
+            // type 2
+            $return['next'] = false;
+            $return['data'] = array(
+                'type' => 2,
+                'pictures' => array(array('title' => 'image 01', 'image' => base_url('images/image01.jpg')),
+                    array('title' => 'image 02', 'image' => base_url('images/image02.jpg')),
+                    array('title' => 'image 03', 'image' => base_url('images/image03.jpg')))
             );
         }
 

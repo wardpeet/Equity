@@ -46,6 +46,8 @@ $(function() {
 
             if (data.type == 1) {
                 slideImages(data);
+            } else if (data.type == 2) {
+                schemeImages(data);
             }
         },
         createNewImages: function(data) {
@@ -93,7 +95,8 @@ $(function() {
                         clearInterval(intv);
                         tree.centerImages();
                     }
-                }, 200);   
+                    
+                }, 5);
             }
         },
         centerImages: function() {
@@ -200,6 +203,23 @@ $(function() {
             
         }
     };
+    
+    var scheme = {
+        init: function() {
+            $children.click(function() {
+                $img = $('img:hidden:first');
+                if ($img.length) {
+                    $img.show().animate({
+                        top: $children.height() + 'px'
+                    }, 'fast', 'linear', function() {
+                        $('img:hidden').css({top: $(window).attr("scrollHeight")});
+                    });
+                    $('html,body').animate({scrollTop: $(document).height()});
+                    $children.height($children.height() + 260);
+                }
+            });
+        }
+    }
 
     $children.children().click(function() {
         tree.updateMainImage($('img', this));
@@ -214,7 +234,6 @@ $(function() {
     });
 
     function slideImages(data) {
-        slider.choiceBox({list: ['tst','ff'], images: ['2-3', '4-5']});
         $('img', $main).height(200);
         $main.height(200).width($('img', $main).width());
         $children.addClass('slider');
@@ -270,5 +289,35 @@ $(function() {
         slider.slideIn(current.next());
 
         slider.init(current);
+    }
+
+    function schemeImages(data) {
+        $('img', $main).height(100);
+        $main.height(100).width($('img', $main).width());
+        $children.addClass('scheme');
+
+        var maxWidth = 0;
+        for (var i=0; i < data.pictures.length; i++) {
+            var $img = $(document.createElement('img'))
+                .attr('src', data.pictures[i].image)
+                .attr('alt', data.pictures[i].title);
+
+            $children.append($img);
+
+            if($img.height() > 250) {
+                $img.height(250);
+            }
+            if($img.width() > maxWidth) {
+                maxWidth = $img.width();
+            }            
+            if (i > 0) {
+                $img.hide();
+                $img.css({top: $(window).height()});
+            }
+        }
+        $children.height(260)
+            .width(maxWidth);
+        
+        scheme.init();
     }
 });
