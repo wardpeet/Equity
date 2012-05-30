@@ -154,3 +154,18 @@ p {
 .choiceBox .button {
     display: block;
 }
+
+/* Scheme
+----------------------------------------------------------------*/
+#children.scheme {
+    height: auto;
+    margin: 0 auto;
+    overflow: hidden;
+}
+#children.scheme img {
+    margin-bottom: 10px;
+    display: block;
+
+    position: absolute;
+    top:0;
+}
