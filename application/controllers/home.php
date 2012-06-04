@@ -4,12 +4,11 @@ class Home extends CI_Controller {
     
     const TYPE_SLIDER = 1;
     const TYPE_SCHEME = 2;
+    const DEFAULT_LANGUAGE = 1;
     
     
-    public function index() {
-        $language = 1;
-        
-        $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren($language);
+    public function index() {        
+        $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren(self::DEFAULT_LANGUAGE);
         $main = array();
         $subs = array();
         foreach($cats AS $category){
