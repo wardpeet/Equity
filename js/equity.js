@@ -1,23 +1,24 @@
 var script = [];
-if(navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
-    $('head').append('<link href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" rel="stylesheet" />');
-    
+if(navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {    
     script[0] = '//code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js';
 }
 Modernizr.load({load: script});
 
 $(function() {
+    // disable ajax cache
+    $.ajaxSetup({cache: false});
     var $img,
         $main = $('#main'),
         $children = $('#children'),
-        previous = null,
+        previous = [],
         count = 0,
-        current = null;
+        current = null,
+        height = 0;
 
     var tree = {
         updateMainImage: function($this) {
             $mImg = $('img', $main);
-            previous = $mImg;
+            previous.push($mImg);
             $img = $this.clone()
                 .css({'z-index': 5,
                     left: 0})
@@ -25,7 +26,9 @@ $(function() {
                 .hide();
             $main.append($img);
             $('.caption', $main).html('<span>' + $img.attr('alt') + '</span>');
-            $main.width($img.width()).height($img.height());
+            $img.load(function() {
+                $main.width($img.width()).height($img.height());
+            });
 
             $mImg.fadeOut('slow');
             $img.fadeIn('slow', function() {
@@ -33,7 +36,7 @@ $(function() {
                 ++count;
             });
 
-            $.get(siteurl + '/home/next', 'category=' + $this.attr('rel'), function(data) {
+            $.get(siteurl + 'home/next/' + $.trim($this.attr('rel')), '', function(data) {
                 if (data.next) {
                     tree.createNewImages(data.data);
                 } else {
@@ -101,15 +104,35 @@ $(function() {
         },
         centerImages: function() {
             var width = 0;
-            $children.children().each(function() {
-                width += $(this).width() + 12;
-            });
-            width = Math.ceil(($children.width() - width + 10) / 2);
-
-            $children.children().each(function() {
+            $children.children().each(function() {                
                 $(this).css('left', width + 'px');
                 width += $(this).width() + 12;
             });
+            $children.css('width', (width - 12) + 'px');
+            this.scaleImages();
+        },
+        scaleImages: function() {
+            $body = $('body').width();
+            if ($body < $children.width()) {
+                var ratio = $body / $children.width();
+                $children.children().each(function() {
+                    $('img', this).height($('img', this).height() * ratio);
+                    $(this).height($('img', this).height());
+                });
+                
+                this.centerImages();
+            } else {
+                var h = $children.children().eq(0).height();
+                if ((!height || height != h) && height < 188) {
+                    var height = h * $body / $children.width();
+                    $children.children().each(function() {
+                        $('img', this).height((height > 188 ? 188 : height));
+                        $(this).height($('img', this).height());
+                    });
+
+                    this.centerImages();
+                }
+            }
         }
     }
 
@@ -224,12 +247,49 @@ $(function() {
     $children.children().click(function() {
         tree.updateMainImage($('img', this));
     });
-    tree.centerImages();
+    $('img').load(function() {
+        tree.centerImages();
+    });
 
     $('#back').click(function() {
-        if (previous) {
-            tree.updateMainImage(previous);
+        var prev = previous.pop();
+        if (prev) {
+            tree.updateMainImage(prev);
+            previous.pop();
         }
+        return false;
+    });
+
+    $('#breadcrumb').bind('click tap', function(e) {
+        if($('.breadcrumb-box').length) {
+            $('.breadcrumb-box').remove();
+            return false;
+        }
+
+        var $this = $(this);
+        function createBox(data) {
+            $ul = $(document.createElement('ul'))
+                .addClass('breadcrumb-box')
+                .css({top: ($this.height() + 25) +'px',
+                    left: '5px'});
+
+            for (var i in data) {
+                $a = $(document.createElement('a')).attr('rel', data[i][0])
+                    .html(data[i][1]); 
+                $ul.append($(document.createElement('li')).append($a));
+            }
+            $('body').append($ul);
+        }
+
+        var data = [];
+        for (var i in previous) {
+            data[i] = [previous[i].attr('rel'), previous[i].attr('alt')];
+        }
+        i = (i != undefined ? i + 1 : 0);
+        $img = $('img', $main);
+        data[i] = [$img.attr('rel'), $img.attr('alt')];
+
+        createBox(data);
         return false;
     });
 

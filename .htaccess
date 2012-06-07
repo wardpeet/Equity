@@ -1,9 +1,10 @@
+allow from all
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
 
-    #RewriteCond %{HTTP_HOST} ^equityforall.com
-    #RewriteRule (.*) http://www.equityforall.com/$1 [R=301,L]
+    #RewriteCond %{HTTP_HOST} ^equityforall.eu
+    #RewriteRule (.*) http://www.equityforall.eu/application/app/index.php/$1 [R=301,L]
 
     #Removes access to the system folder by users.
     #Additionally this will allow you to create a System.php controller,

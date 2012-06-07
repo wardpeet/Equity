@@ -6,7 +6,7 @@ use Doctrine\Mapping;
 
 /**
  * @Entity(repositoryClass="Repositories\CategoryRepository")
- * @Table(name="categories")
+ * @Table(name="Categories")
  */
 class Category {
 

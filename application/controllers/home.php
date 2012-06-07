@@ -7,7 +7,7 @@ class Home extends CI_Controller {
     const DEFAULT_LANGUAGE = 1;
     
     
-    public function index() {        
+    public function index() {
         $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getRootCatAndChildren(self::DEFAULT_LANGUAGE);
         $main = array();
         $subs = array();
@@ -22,18 +22,18 @@ class Home extends CI_Controller {
         $this->load->view('home', $data);
     }
 
-    public function next() {
-        $category = $this->input->get('category');
+    public function next($category=0) {
         if(!$category || !is_numeric($category)){
             return;
         }
-        
+
         $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getChildren($category);
         $return = array('next' => false, 'data' => array());
-        foreach($cats AS $category){
+        foreach($cats as $category){
             $return['next'] = true;
-            $return['data'][] = array('id' => $category->getId(), 'image' => base_url('images/'.$category->getId().'.jpg'), 'title' => $category->getName());
+            $return['data'][] = array('id' => $category->getId(), 'image' => base_url('images/' . $category->getId() . '.jpg'), 'title' => $category->getName());
         }
+
         if(!$return['next']){
             $type = Doctrine::getInstance()->getRepository('Entities\Category')->getType($category);
             switch($type){
