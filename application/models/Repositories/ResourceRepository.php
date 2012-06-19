@@ -12,7 +12,10 @@ class ResourceRepository extends EntityRepository {
     }
     
     public function getResources($category_id) {
-        $qb = $this->_em->createQuery("SELECT r FROM Entities\Resource r WHERE r.category = :cat")->setParameter('cat', $category_id);
+        $qb = $this->_em->createQuery("SELECT r FROM Entities\Resource r
+            WHERE r.category = :cat
+            ORDER BY r.parent")->setParameter('cat', $category_id);
+
         return $qb->getResult();
     }
 

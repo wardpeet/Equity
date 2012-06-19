@@ -24,8 +24,9 @@ class Home extends CI_Controller {
 
     public function next($category=0) {
         if(!$category || !is_numeric($category)){
-            return;
+            echo json_encode(array());
         }
+        $category = (int) $category;
 
         $cats = Doctrine::getInstance()->getRepository('Entities\Category')->getChildren($category);
         $return = array('next' => false, 'data' => array());
@@ -36,37 +37,65 @@ class Home extends CI_Controller {
 
         if(!$return['next']){
             $type = Doctrine::getInstance()->getRepository('Entities\Category')->getType($category);
+
             switch($type){
                 case self::TYPE_SLIDER:
                 case self::TYPE_SCHEME:
                     $return['data']['type'] = $type;
-                    $return['data']['resources'] = array();
-                    
-                    $oldid = 0;
-                    $newid = 0;
-                    $tmp = Doctrine::getInstance()->getRepository('Entities\Resource')->getResources($category);
-                    foreach($tmp as $key => $val){
-                        if($val->getParent() == null){
-                            $return['data']['resources'][] = $val->getArray();
-                            $newid = $val->getId();
-                            unset($tmp[$key]);
-                            break;
-                        }
-                    }
-                    while($oldid != $newid && count($tmp) != 0){
-                        foreach($tmp as $key => $val){
-                            if($val->getParent() == $newid){
-                                $return['data']['resources'][] = $val->getArray();
-                                $oldid = $newid;
-                                $newid = $val->getId();
-                                unset($tmp[$key]);
-                                break;
+                    $return['data']['resources'] = $return['data']['choices'] = array();
+
+                    $resources = Doctrine::getInstance()->getRepository('Entities\Resource')->getResources($category);
+
+                    $parent = -1;
+                    $choices = array();
+                    $resource = reset($resources);
+                    // set data en get diff choices
+                    while($resource) {
+                        if ($type == self::TYPE_SLIDER) {
+                            if($parent == $resource->getParent()) {
+                                if (!$choices) {
+                                    $choices[] = prev($resources);
+                                    next($resources);
+                                }
+
+                                $choices[] = $resource;
                             }
+
+                            $parent = $resource->getParent();
+                        }
+                        $return['data']['resources'][] = array('type' => $resource->getType(),
+                            'value' => str_replace($_SERVER['DOCUMENT_ROOT'], '', $resource->getValue()),
+                            'title' => $resource->getTitle());
+
+                        $resource = next($resources);
+                    }
+
+                    // now calculate the choices
+                    $return['data']['choices'] = array();
+                    if ($choices) {
+                        foreach($choices as $choice) {
+                            $tmpChoices = array('text' => $choice->getTitle(),
+                                'resources' => array());
+
+                            $current = $choice->getId();
+                            $i=1;
+                            foreach ($resources as $resource) {
+                                if($current == $resource->getId()) {
+                                    $tmpChoices['resources'] = $i;
+                                } else if($current == $resource->getParent()) {
+                                    $current = $resource->getId();
+                                    $tmpChoices['resources'] .= '-' . $i;
+                                }
+                                ++$i;
+                            }
+
+                            $return['data']['choices'][] = $tmpChoices;
                         }
                     }
                 break;
             }
         }
+
         echo json_encode($return);
     }
 }

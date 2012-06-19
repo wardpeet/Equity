@@ -6,7 +6,7 @@ use Doctrine\Mapping;
 
 /**
  * @Entity(repositoryClass="Repositories\ResourceRepository")
- * @Table(name="resources")
+ * @Table(name="Resources")
  */
 class Resource {
 
@@ -38,6 +38,11 @@ class Resource {
      * @Column(type="text")
      */
     protected $value;
+    
+    /**
+     * @Column(type="string",length=100)
+     */
+    protected $title;
     
     public function getId() {
         return $this->id;
@@ -89,6 +94,14 @@ class Resource {
         $this->value = $value;
     }
     
+    public function getTitle() {
+        return $this->title;
+    }
+    public function setTitle($title) {
+        $this->title = $title;
+    }
+
+        
     
     
     public function getArray(){

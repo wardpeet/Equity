@@ -1,4 +1,5 @@
 var script = [];
+// load jquery mobile or don't
 if(navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {    
     script[0] = '//code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js';
 }
@@ -6,7 +7,7 @@ Modernizr.load({load: script});
 
 $(function() {
     // disable ajax cache
-    $.ajaxSetup({cache: false});
+    $.ajaxSetup({cache: true});
     var $img,
         $main = $('#main'),
         $children = $('#children'),
@@ -36,33 +37,41 @@ $(function() {
                 ++count;
             });
 
-            $.get(siteurl + 'home/next/' + $.trim($this.attr('rel')), '', function(data) {
+            $.get('home/next/' + $.trim($this.attr('rel')), '', function(data) {
                 if (data.next) {
                     tree.createNewImages(data.data);
                 } else {
                     tree.createInfoPage(data.data);
                 }
-            }, 'json');
+            }, 'json')
+            .fail(function() {
+                $('#back').click();
+            });
         },
         createInfoPage: function(data) {
             $children.children().remove();
 
             if (data.type == 1) {
-                slideImages(data);
+                app.slideImages(data);
             } else if (data.type == 2) {
-                schemeImages(data);
+                app.schemeImages(data);
             }
         },
         createNewImages: function(data) {
             if($children.attr('class')) {
                 $children.html('');
-                $children.removeClass();
+                $children.removeAttr('class');
+                $children.unbind();
             }
+            $children.removeAttr('style');
 
             var $images = $children.children();
             var length = $images.length;
             count = 0;
-            for(var i=0; i<data.length; i++) {
+
+            $images = $children.children();
+
+            for(var i=0; i < data.length; i++) {
                 var $div = $(document.createElement('div'))
                     .css({left: $images.eq(i).css('left')})
                     .hide();
@@ -78,37 +87,54 @@ $(function() {
                 });
 
                 $children.append($div);
-                $images.eq(i).fadeOut('slow', function() {
-                    ++count;
-                    $(this).remove();
-                });
-                $div.fadeIn('slow');
-            }
 
-            $images = $children.children();
-            for(var j=data.length; j < length; j++) {
-                $images.eq(j).remove();
-            }
+                if(i < length) {
+                    $images.eq(i).fadeOut('slow', function() {
+                        ++count;
+                        $(this).remove();
 
-            if($children.children().length == data.length) {
-                this.centerImages();
-            } else {
-                var intv = setInterval(function() {
-                    if($children.children().length == data.length) {
-                        clearInterval(intv);
-                        tree.centerImages();
+                        if (count == data.length) {
+                            for (var j=count; j<length; j++) {
+                                $images.eq(j).remove();
+                            }
+
+                            // wait until jquery is done removing
+                            var interval = setInterval(function() {
+                                if (data.length == $children.children().length) {
+                                    clearInterval(interval);
+                                    tree.centerImages();
+                                }
+                            }, 50);
+                        }
+                    });
+                }
+
+                $div.fadeIn('slow', function() {
+                    if (length < data.length) {
+                        ++count;
+
+                        if (count == data.length) {
+                            // wait until jquery is done adding
+                            var interval = setInterval(function() {
+                                if (data.length == $children.children().length) {
+                                    clearInterval(interval);
+                                    tree.centerImages();
+                                }
+                            });
+                        }
                     }
-                    
-                }, 5);
+                });
             }
         },
         centerImages: function() {
             var width = 0;
-            $children.children().each(function() {                
-                $(this).css('left', width + 'px');
-                width += $(this).width() + 12;
+            $children.children().each(function() {
+                if ($(this).is(':visible')) {
+                    $(this).css('left', width + 'px');
+                    width += $(this).width() + 12;
+                }
             });
-            $children.css('width', (width - 12) + 'px');
+            $children.width(width - 12);
             this.scaleImages();
         },
         scaleImages: function() {
@@ -142,13 +168,13 @@ $(function() {
             if(!$element.prev().is('div')) {
                 $element.prev().unbind('click');
                 $element.prev().bind('click', function() {
-                    doSlideLeft();
+                    slider.doSlideLeft(current);
                 });
             }
             if(!$element.next().is('div')) {
                 $element.next().unbind('click');
                 $element.next().bind('click', function() {
-                    doSlideRight();
+                    slider.doSlideRight(current);
                 });
             }
         },
@@ -189,6 +215,26 @@ $(function() {
                 $(this).addClass('small');
             });
         },
+        doSlideLeft: function(cur) {
+            this.slideAway(cur.next());
+            this.slideToSmall(cur, 0);
+            cur = cur.prev();
+            this.slideToBig(cur, 0);
+            this.slideIn(cur.prev());
+
+            this.init(cur);
+            current = cur;
+        },
+        doSlideRight: function(cur) {
+            this.slideAway(cur.prev());
+            this.slideToSmall(cur, 0);
+            cur = cur.next();
+            this.slideToBig(cur, 0);
+            this.slideIn(cur.next());
+
+            this.init(cur);
+            current = cur;
+        },
         choiceBox: function(choices) {
             var $choice = $(document.createElement('div'))
                 .addClass('choiceBox')
@@ -196,12 +242,12 @@ $(function() {
             $('body').append($(document.createElement('div')).attr('id', 'overlay'))
                 .append($choice);
             
-            for (var i in choices.list) {
+            for (var i in choices) {
                 $a = $(document.createElement('a'))
                     .addClass('button')
-                    .text(choices.list[i])
-                    .attr('href', '#' + choices.list[i])
-                    .attr('rel', choices.images)
+                    .text(choices[i].text)
+                    .attr('href', '#' + choices[i].text)
+                    .attr('rel', choices[i].resources)
                     .click(function() {
                         $('#overlay').remove();
                         $(this).parent().remove();
@@ -210,11 +256,15 @@ $(function() {
                         $choice.children('a').each(function() {
                             if(this != tag) {
                                 var pictures = $(this).attr('rel').split('-');
-                                for(var j=parseInt(pictures[0]) + 1; j <= parseInt(pictures[1]) + 1; j++) {
-                                    $children.children().eq(0).children().eq(j).remove();
+                                var deleted = 0; // the dom tree changes so we deduct our pictures index too
+                                for(var i in pictures) {
+                                    $children.children().children().eq(parseInt(pictures[i]) - deleted).remove();
+                                    ++deleted;
                                 }
                             }
-                        })
+                        });
+                        $children.children().children().eq(2).css('display', 'inline-block');
+                        slider.init(current);
 
                         return false;
                     });
@@ -241,6 +291,100 @@ $(function() {
                     $children.height($children.height() + 260);
                 }
             });
+        }
+    }
+    
+    var resourceHandler = {
+        create: function(type, data) {
+            var $return = null;
+            switch(type) {
+                case 1:
+                    $return = $(document.createElement('img'))
+                        .attr('src', data.value)
+                        .attr('alt', data.title)
+                        .attr('title', data.title);
+                    break;
+            }
+            
+            return $return;
+        }
+    }
+
+    var app = {
+        slideImages: function(data) {
+            $('img:last', $main).height(200);
+            $main.height(200).width($('img:last', $main).width() + 2); // + 2 is the border
+            $children.addClass('slider');
+
+            $children.append($(document.createElement('div')).addClass('small').html('&nbsp;'));
+            for (var i=0; i < data.resources.length; i++) {
+                var $img = resourceHandler.create(data.resources[i].type, data.resources[i])
+                    .addClass('small');
+                if (i > 1) {
+                    $img.hide();
+                }
+
+                $children.append($img);
+                
+            }
+            $children.append($(document.createElement('div')).addClass('small').html('&nbsp;'));
+            $children.children().eq(1).removeClass('small');
+
+            // if there is a choicebox use it
+            if (data.choices.length) {
+                slider.choiceBox(data.choices);
+            }
+
+            // swipe effects
+            if ($('html').has('.ui-mobile')) {
+                $children.bind('swiperight', function() {
+                    if(!current.prev().is('div')) {
+                        slider.doSlideLeft(current);
+                    }
+                });
+                $children.bind('swipeleft', function() {
+                    if(!current.next().is('div')) {
+                        slider.doSlideRight(current);
+                    }
+                });
+            }
+
+            // center the box
+            var childs = $children.children();
+            $children.width(200 + 200 + 467 + 20 + 6); // 20 = margin and 6 are 6 borders
+
+            current = $children.children().eq(1);
+            slider.init(current);
+        },
+        schemeImages: function(data) {
+            $('img:last', $main).height(100);
+            $main.height(100).width($('img:last', $main).width() + 2); // 2 border
+            $children.addClass('scheme');
+
+            var maxWidth = 0;
+            for (var i=0; i < data.resources.length; i++) {
+                var $img = resourceHandler.create(data.resources[i].type, data.resources[i]);
+                $children.append($img);
+
+                $img.load(function() {
+                    if($(this).height() > 250) {
+                        $(this).height(250);
+                    }
+                    if($(this).width() > maxWidth) {
+                        maxWidth = $(this).width();
+
+                        $children.height(260)
+                            .width(maxWidth);
+                    }                    
+                });
+
+                if (i > 0) {
+                    $img.hide();
+                    $img.css({top: $(window).height()});
+                }
+            }
+
+            scheme.init();
         }
     }
 
@@ -293,91 +437,11 @@ $(function() {
         return false;
     });
 
-    function slideImages(data) {
-        $('img', $main).height(200);
-        $main.height(200).width($('img', $main).width());
-        $children.addClass('slider');
-
-        // add images to slider
-        $div = $(document.createElement('div'));
-        $children.append($div);
-
-        $children = $div;
-        $children.append($(document.createElement('div')).addClass('small').html('&nbsp;'));
-        for (var i=0; i < data.pictures.length; i++) {
-            var $img = $(document.createElement('img'))
-                .attr('src', data.pictures[i].image)
-                .attr('alt', data.pictures[i].title)
-                .addClass('small');
-            if (i > 1) {
-                $img.hide();
-            }
-
-            $children.append($img);
-        }
-        $children.append($(document.createElement('div')).addClass('small').html('&nbsp;'));
-        $children.children().eq(1).removeClass('small');
-
-        // swipe effects
-        if ($('html').has('.ui-mobile')) {
-            $children.bind('swipeleft', function() {
-                doSlideLeft();
-            });
-            $children.bind('swiperight', function() {
-                doSlideRight();
-            });
-        }
-
-        current = $children.children().eq(1);
-        slider.init(current);
-        $children = $children.parent();
-    }    
-    function doSlideLeft() {
-        slider.slideAway(current.next());
-        slider.slideToSmall(current, 0);
-        current = current.prev();
-        slider.slideToBig(current, 0);
-        slider.slideIn(current.prev());
-
-        slider.init(current);
-    }    
-    function doSlideRight() {
-        slider.slideAway(current.prev());
-        slider.slideToSmall(current, -10);
-        current = current.next();
-        slider.slideToBig(current, 0);
-        slider.slideIn(current.next());
-
-        slider.init(current);
-    }
-
-    function schemeImages(data) {
-        $('img', $main).height(100);
-        $main.height(100).width($('img', $main).width());
-        $children.addClass('scheme');
-
-        var maxWidth = 0;
-        for (var i=0; i < data.pictures.length; i++) {
-            var $img = $(document.createElement('img'))
-                .attr('src', data.pictures[i].image)
-                .attr('alt', data.pictures[i].title);
-
-            $children.append($img);
-
-            if($img.height() > 250) {
-                $img.height(250);
-            }
-            if($img.width() > maxWidth) {
-                maxWidth = $img.width();
-            }            
-            if (i > 0) {
-                $img.hide();
-                $img.css({top: $(window).height()});
-            }
-        }
-        $children.height(260)
-            .width(maxWidth);
-        
-        scheme.init();
+    function sleep(delay) {
+        var startTime = new Date();
+        var endTime = null;
+        do {
+            endTime = new Date();
+        } while ((endTime - startTime) < delay);
     }
 });

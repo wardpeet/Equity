@@ -59,7 +59,12 @@ p {
 
     text-align: left;
 }
-
+.ui-loader {
+    display: none;
+}
+.ui-page {
+    outline: none;
+}
 /* Button
 ----------------------------------------------------------------*/
 .button {
@@ -141,11 +146,11 @@ p {
 /* Slider
 ----------------------------------------------------------------*/
 #children.slider {
-    width: 891px; height: auto;
+    width: 893px; height: auto;
     overflow: hidden;
 }
 #children.slider > div {
-    width: 9999px;  
+    margin: 0; 
 }
 #children.slider img {
     width: 467px;
@@ -156,6 +161,10 @@ p {
     cursor: default;
 
     position: static;
+}
+#children.slider div.small {
+    height: 150px;
+    vertical-align: bottom;
 }
 #children.slider .small {
     width: 200px; height: auto;

@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://equityforall.eu/application/app/';
+$config['base_url']	= 'http://www.equityforall.eu/application/app/';
 
 /*
 |--------------------------------------------------------------------------
